@@ -1,0 +1,7 @@
+---
+- name: Install rabbitmq, erlang, highavailability, rabbitmqadmin
+  hosts: all
+  become: true
+
+  roles: 
+    - rabbitmq

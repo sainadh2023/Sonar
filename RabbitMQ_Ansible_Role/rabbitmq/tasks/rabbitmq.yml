@@ -1,0 +1,22 @@
+---
+- name: Add RabbitMQ Repository PGP Key
+  ansible.builtin.shell: >
+    curl -1sLf "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xf77f1eda57ebb1cc" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg > /dev/null &&
+    curl -1sLf "https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/io.packagecloud.rabbitmq.gpg > /dev/null
+
+- name: Add RabbitMQ Repository to System
+  ansible.builtin.shell: >
+    echo 'deb [signed-by=/usr/share/keyrings/io.packagecloud.rabbitmq.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ jammy main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list > /dev/null &&
+    echo 'deb-src [signed-by=/usr/share/keyrings/io.packagecloud.rabbitmq.gpg] https://packagecloud.io/rabbitmq/rabbitmq-server/ubuntu/ jammy main' | sudo tee -a /etc/apt/sources.list.d/rabbitmq.list > /dev/null
+
+- name: Update RabbitMQ Repository
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install RabbitMQ
+  ansible.builtin.apt:
+    name: rabbitmq-server
+    state: present
+
+- name: Set RabbitMQ Package to Remain Fixed at v3.9.13 (Disable auto-update)
+  ansible.builtin.command: echo "rabbitmq-server hold" | sudo dpkg --set-selections

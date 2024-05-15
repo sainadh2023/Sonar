@@ -1,0 +1,13 @@
+---
+- name: Copy Proxy Script file to remote location
+  copy:
+    src: setup_proxy.sh
+    dest: /home/ubuntu/setup_proxy.sh
+    mode: '0700'
+
+- name: Run Proxy script in remote location
+  shell: "/home/ubuntu/setup_proxy.sh"
+  register: script_output
+
+- debug:
+    var: script_output

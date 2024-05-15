@@ -1,0 +1,24 @@
+---
+- name: Set Erlang repository GPG key to APT
+  ansible.builtin.shell: curl -1sLf "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xf77f1eda57ebb1cc" | sudo gpg --dearmor | sudo tee /usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg > /dev/null
+
+- name: Add official Erlang repository to APT
+  ansible.builtin.shell: >
+    echo 'deb [signed-by=/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu jammy main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list > /dev/null &&
+    echo 'deb-src [signed-by=/usr/share/keyrings/net.launchpad.ppa.rabbitmq.erlang.gpg] http://ppa.launchpad.net/rabbitmq/rabbitmq-erlang/ubuntu jammy main' | sudo tee -a /etc/apt/sources.list.d/rabbitmq.list > /dev/null
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Erlang packages
+  ansible.builtin.apt:
+    name: "{{ item }}={{ erlang_version }}"
+    state: present
+    update_cache: yes
+  loop: "{{ erlang_packages }}"
+
+- name: Set Erlang packages to remain fixed at version 26.2.3
+  ansible.builtin.shell: echo "{{ item }} hold" | sudo dpkg --set-selections
+  loop: "{{ erlang_packages }}"
+
